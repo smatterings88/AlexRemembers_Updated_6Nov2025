@@ -439,19 +439,46 @@ export default function HomePage() {
             return;
           }
 
-          const texts = uvSession.transcripts
-            .filter(t => t && typeof t === 'object')
-            .map(t => ({
-              speaker: t.speaker || 'unknown',
-              text: t.text || ''
-            }))
-            .filter(t => t.text.trim() !== '');
-          
-          setTranscripts(texts);
-          currentTranscriptsRef.current = texts;
+          // Log transcripts for debugging
+          console.log('📝 Ultravox transcripts:', uvSession.transcripts);
 
-          if (texts.length > 0) {
-            saveCallMemory(texts).catch(err => {
+          // Process transcripts - Ultravox provides full conversation history
+          const newTexts = uvSession.transcripts
+            .filter(t => t && typeof t === 'object' && t.text && t.text.trim())
+            .map(t => {
+              // Normalize speaker value
+              let speaker = 'unknown';
+              if (t.speaker === 'user' || t.speaker === 'agent') {
+                speaker = t.speaker;
+              } else if (typeof t.speaker === 'string') {
+                const speakerLower = t.speaker.toLowerCase();
+                if (speakerLower.includes('user')) {
+                  speaker = 'user';
+                } else if (speakerLower.includes('agent') || speakerLower.includes('assistant')) {
+                  speaker = 'agent';
+                } else {
+                  speaker = t.speaker;
+                }
+              }
+              
+              return {
+                speaker,
+                text: String(t.text || '').trim()
+              };
+            })
+            .filter(t => t.text.length > 0);
+          
+          // Log processed transcripts with speaker breakdown
+          const userCount = newTexts.filter(t => t.speaker === 'user').length;
+          const agentCount = newTexts.filter(t => t.speaker === 'agent').length;
+          console.log(`✅ Processed transcripts: ${newTexts.length} total (${userCount} user, ${agentCount} agent)`, newTexts);
+          
+          // Update transcripts - Ultravox provides full history, so we replace
+          setTranscripts(newTexts);
+          currentTranscriptsRef.current = newTexts;
+
+          if (newTexts.length > 0) {
+            saveCallMemory(newTexts).catch(err => {
               console.error('Error saving transcripts:', err);
             });
           }
@@ -835,18 +862,30 @@ export default function HomePage() {
             >
               {showTranscripts ? (
                 <div className="space-y-3 sm:space-y-4 min-h-full">
-                  {transcripts.map((transcript, index) => (
-                    <div 
-                      key={index} 
-                      className={`p-3 sm:p-4 rounded-lg text-white max-w-[85%] sm:max-w-[80%] text-sm sm:text-base ${
-                        transcript.speaker === 'user' 
-                          ? 'ml-auto bg-[#2C74B3]' 
-                          : 'mr-auto bg-[#144272]'
-                      }`}
-                    >
-                      {transcript.text}
+                  {transcripts.length === 0 ? (
+                    <div className="text-gray-400 text-center py-8">
+                      <p>Conversation will appear here...</p>
                     </div>
-                  ))}
+                  ) : (
+                    transcripts.map((transcript, index) => {
+                      const isUser = transcript.speaker === 'user' || transcript.speaker.toLowerCase() === 'user';
+                      return (
+                        <div 
+                          key={`${transcript.speaker}-${index}-${transcript.text.substring(0, 10)}`}
+                          className={`p-3 sm:p-4 rounded-lg text-white max-w-[85%] sm:max-w-[80%] text-sm sm:text-base ${
+                            isUser
+                              ? 'ml-auto bg-[#2C74B3]' 
+                              : 'mr-auto bg-[#144272]'
+                          }`}
+                        >
+                          <div className="font-semibold text-xs mb-1 opacity-80">
+                            {isUser ? 'You' : 'Alex'}
+                          </div>
+                          <div>{transcript.text}</div>
+                        </div>
+                      );
+                    })
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
               ) : (
