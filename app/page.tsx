@@ -448,16 +448,18 @@ export default function HomePage() {
             .map(t => {
               // Normalize speaker value
               let speaker = 'unknown';
-              if (t.speaker === 'user' || t.speaker === 'agent') {
-                speaker = t.speaker;
-              } else if (typeof t.speaker === 'string') {
-                const speakerLower = t.speaker.toLowerCase();
+              const speakerValue = t.speaker as string | 'user' | 'agent' | undefined;
+              
+              if (speakerValue === 'user' || speakerValue === 'agent') {
+                speaker = speakerValue;
+              } else if (speakerValue && typeof speakerValue === 'string') {
+                const speakerLower = speakerValue.toLowerCase();
                 if (speakerLower.includes('user')) {
                   speaker = 'user';
                 } else if (speakerLower.includes('agent') || speakerLower.includes('assistant')) {
                   speaker = 'agent';
                 } else {
-                  speaker = t.speaker;
+                  speaker = speakerValue;
                 }
               }
               
