@@ -81,7 +81,9 @@ export default function UserDropdown({ user, onRefresh }: UserDropdownProps) {
 
   const userIsAdmin = isAdmin(user);
 
-  const gravatarUrl = `https://www.gravatar.com/avatar/${md5(user.email.toLowerCase().trim())}?d=mp`;
+  const gravatarUrl = user.email 
+    ? `https://www.gravatar.com/avatar/${md5(user.email.toLowerCase().trim())}?d=mp`
+    : 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp';
 
   const LoadingPulse = ({ className }: { className: string }) => (
     <div className={`${className} bg-gray-700 animate-[pulse_1.5s_ease-in-out_infinite] rounded`} />
