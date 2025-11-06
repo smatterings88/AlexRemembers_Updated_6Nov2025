@@ -44,10 +44,13 @@ NEXT_PUBLIC_OPENCAGE_API_KEY=your_opencage_api_key
 NEXT_PUBLIC_APP_VERSION=1.0.0
 ```
 
-#### Server-side Only (No NEXT_PUBLIC prefix)
+#### Vector Memory (Pinecone + OpenAI)
 ```
-MEM0_API_KEY=your_mem0_api_key
+PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_INDEX_NAME=alexlistens-memories
+OPENAI_API_KEY=your_openai_api_key
 ```
+
 
 ### 3. Build Settings
 

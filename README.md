@@ -6,7 +6,7 @@ AlexListens is an advanced AI voice assistant that provides natural, empathetic 
 
 - 🎙️ Real-time voice interaction
 - 📝 Live conversation transcription
-- 🧠 Smart memory system
+- 🧠 Vector-based semantic memory system
 - 🔐 Secure user authentication
 - 💬 Persistent conversation history
 - 💰 Wallet-based call time management
@@ -20,7 +20,7 @@ AlexListens is an advanced AI voice assistant that provides natural, empathetic 
 - **UI Components**: Headless UI 2.1.0, Lucide React 0.460.0
 - **Backend**: Firebase 11.1.0 (Auth + Firestore)
 - **Voice AI**: Ultravox Client 0.3.6
-- **Memory System**: Mem0 2.1.3
+- **Vector Memory**: Pinecone + OpenAI Embeddings
 - **Location Services**: OpenCage Geocoding API (optional)
 
 ## Getting Started
@@ -62,9 +62,13 @@ NEXT_PUBLIC_AUSSIE_AGENT_ID=your_aussie_agent_id
 # Get from: https://opencagedata.com/
 NEXT_PUBLIC_OPENCAGE_API_KEY=your_opencage_api_key
 
-# Mem0 Configuration
-# Get from: https://mem0.ai/
-MEM0_API_KEY=your_mem0_api_key
+# Vector Memory Configuration (Pinecone + OpenAI)
+# Get Pinecone API key from: https://www.pinecone.io/
+PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_INDEX_NAME=alexlistens-memories  # Optional, defaults to 'alexlistens-memories'
+
+# Get OpenAI API key from: https://platform.openai.com/
+OPENAI_API_KEY=your_openai_api_key
 ```
 
 ## Architecture
@@ -130,10 +134,24 @@ The system automatically uses the appropriate Ultravox agent based on user prefe
 3. Add `NEXT_PUBLIC_OPENCAGE_API_KEY=your_key` to `.env.local`
 4. If not configured, the app will gracefully fall back to "Location not available"
 
-### Mem0 Configuration
-1. Sign up for Mem0 at [https://mem0.ai/](https://mem0.ai/)
-2. Get your API key
-3. Add `MEM0_API_KEY=your_key` to `.env.local` (no NEXT_PUBLIC prefix - server-side only)
+### Vector Memory Configuration (Pinecone + OpenAI)
+
+The app uses Pinecone for vector storage and OpenAI for generating embeddings:
+
+1. **Pinecone Setup**:
+   - Sign up at [https://www.pinecone.io/](https://www.pinecone.io/)
+   - Create a new index (or use default `alexlistens-memories`)
+   - Get your API key from the dashboard
+   - Add `PINECONE_API_KEY=your_key` to `.env.local`
+   - Optionally set `PINECONE_INDEX_NAME=your_index_name` (defaults to `alexlistens-memories`)
+
+2. **OpenAI Setup**:
+   - Sign up at [https://platform.openai.com/](https://platform.openai.com/)
+   - Get your API key from the API keys section
+   - Add `OPENAI_API_KEY=your_key` to `.env.local`
+   - Uses `text-embedding-3-small` model (1536 dimensions)
+
+**Note**: The Pinecone index will be created automatically on first use if it doesn't exist. Make sure your Pinecone account has sufficient credits.
 
 ## Admin Configuration
 
@@ -161,7 +179,7 @@ To add or modify admin emails, update both files.
 ├── lib/                # Utility functions
 │   ├── admin.ts        # Admin utilities
 │   ├── firebase.ts     # Firebase config
-│   ├── mem0.ts         # Mem0 client
+│   ├── vector-memory.ts # Vector memory service (Pinecone + OpenAI)
 │   └── wallet.ts       # Wallet functions
 └── firestore.rules     # Firestore security rules
 ```

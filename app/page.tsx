@@ -222,6 +222,7 @@ export default function HomePage() {
     }
 
     try {
+      // Store in Firestore (for backward compatibility and admin access)
       const callMemoryData = {
         userId: user.uid,
         callId: callIdRef.current,
@@ -232,6 +233,27 @@ export default function HomePage() {
 
       const docRef = doc(db, 'callmemory', callIdRef.current);
       await setDoc(docRef, callMemoryData, { merge: true });
+
+      // Store in vector memory for semantic search (via API route)
+      try {
+        await fetch('/api/vector-memory', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.uid,
+            callId: callIdRef.current,
+            transcripts: transcriptData,
+            action: 'store',
+          }),
+        }).catch(err => {
+          console.error('Failed to store in vector memory (non-critical):', err);
+        });
+      } catch (vectorError) {
+        console.error('Failed to store in vector memory (non-critical):', vectorError);
+        // Don't throw - allow Firestore storage to succeed even if vector storage fails
+      }
     } catch (error) {
       console.error('Failed to save call memory:', error);
     }
@@ -289,6 +311,12 @@ export default function HomePage() {
       walletBalance: currentWalletBalance
     });
 
+    // Create a query for vector search based on user's name and context
+    // This helps retrieve semantically relevant memories
+    const conversationQuery = firstName 
+      ? `Conversation with ${firstName} about their life and experiences`
+      : 'Previous conversations and context';
+
     // Call our local API route instead of Ultravox directly
     const response = await fetch('/api/ultravox-call', {
       method: 'POST',
@@ -302,7 +330,9 @@ export default function HomePage() {
         userLocation: userLocation || 'Unknown Location',
         totalCalls: totalCalls || 0,
         alexEthnicity: alexEthnicity,
-        walletBalance: currentWalletBalance // Pass wallet balance from client
+        walletBalance: currentWalletBalance, // Pass wallet balance from client
+        userId: userId, // Pass userId for vector memory lookup
+        conversationQuery: conversationQuery // Query for semantic search
       }),
     });
 
