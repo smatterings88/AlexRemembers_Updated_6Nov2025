@@ -8,7 +8,7 @@ import { collection, getDocs, doc, getDoc, query, orderBy, limit } from 'firebas
 import { isAdmin } from '../../lib/admin';
 import { getWalletBalance, loadMinutes, formatSecondsToMinutes } from '../../lib/wallet';
 import UserDropdown from '../../components/UserDropdown';
-import { ArrowLeft, Users, Wallet, Phone, BarChart3, Search, Plus, RefreshCw, Shield } from 'lucide-react';
+import { ArrowLeft, Users, Wallet, Phone, BarChart3, Search, Plus, RefreshCw, Shield, Eye, EyeOff, Copy } from 'lucide-react';
 
 interface UserData {
   uid: string;
@@ -48,6 +48,14 @@ export default function AdminPage() {
   const [addingMinutes, setAddingMinutes] = useState(false);
   const [minutesToAdd, setMinutesToAdd] = useState<string>('10');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [newFirstName, setNewFirstName] = useState('');
+  const [newLastName, setNewLastName] = useState('');
+  const [newUsername, setNewUsername] = useState('');
+  const [createdTempPassword, setCreatedTempPassword] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -171,6 +179,48 @@ export default function AdminPage() {
     await loadAllData();
   };
 
+  const handleCreateUser = async () => {
+    if (!newEmail) {
+      alert('Email is required');
+      return;
+    }
+    try {
+      setCreating(true);
+      setCreatedTempPassword(null);
+      const idToken = await auth.currentUser?.getIdToken();
+      const res = await fetch('/api/admin/create-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          email: newEmail.trim(),
+          firstName: newFirstName.trim() || undefined,
+          lastName: newLastName.trim() || undefined,
+          username: newUsername.trim() || undefined,
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || 'Failed to create user');
+      }
+
+      // Show temp password and refresh table
+      setCreatedTempPassword(data.tempPassword);
+      setNewEmail('');
+      setNewFirstName('');
+      setNewLastName('');
+      setNewUsername('');
+      await loadAllData();
+    } catch (err) {
+      console.error('Create user failed:', err);
+      alert((err as Error).message);
+    } finally {
+      setCreating(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0A2647] via-[#144272] to-[#205295] flex items-center justify-center">
@@ -270,6 +320,12 @@ export default function AdminPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent"
               />
             </div>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" /> Create User
+            </button>
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
@@ -392,6 +448,113 @@ export default function AdminPage() {
                 className="flex-1 px-4 py-2 bg-[#2C74B3] text-white rounded-lg hover:bg-[#205295] transition-colors disabled:opacity-50"
               >
                 {addingMinutes ? 'Adding...' : 'Add Minutes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md">
+            <h2 className="text-2xl font-bold text-[#0A2647] mb-4">Create New User</h2>
+
+            <div className="space-y-3 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent"
+                  placeholder="user@example.com"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                  <input
+                    type="text"
+                    value={newFirstName}
+                    onChange={(e) => setNewFirstName(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent"
+                    placeholder="First name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                  <input
+                    type="text"
+                    value={newLastName}
+                    onChange={(e) => setNewLastName(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent"
+                    placeholder="Last name"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Username (optional)</label>
+                <input
+                  type="text"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent"
+                  placeholder="username"
+                />
+              </div>
+            </div>
+
+            {createdTempPassword && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                <p className="text-sm text-green-800 font-medium mb-2">Temporary password created</p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    readOnly
+                    value={createdTempPassword}
+                    className="flex-1 px-3 py-2 border border-green-300 rounded-lg bg-white text-green-900"
+                  />
+                  <button
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="p-2 text-green-700 hover:text-green-900"
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(createdTempPassword)}
+                    className="p-2 text-green-700 hover:text-green-900"
+                    title="Copy password"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-xs text-green-700 mt-2">Share this password securely with the user. They will be required to change it on first login.</p>
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setNewEmail('');
+                  setNewFirstName('');
+                  setNewLastName('');
+                  setNewUsername('');
+                  setCreatedTempPassword(null);
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 disabled:text-gray-400"
+                disabled={creating}
+              >
+                Close
+              </button>
+              <button
+                onClick={handleCreateUser}
+                disabled={creating}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+              >
+                {creating ? 'Creating...' : 'Create User'}
               </button>
             </div>
           </div>

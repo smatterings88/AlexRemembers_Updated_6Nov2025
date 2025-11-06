@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import { onAuthStateChanged, User, updatePassword } from 'firebase/auth';
 import { auth, db } from '../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { initWalletForUser, getWalletBalance } from '../../lib/wallet';
@@ -17,6 +17,9 @@ export default function DashboardPage() {
   const [alexEthnicity, setAlexEthnicity] = useState<string>('English');
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string>('');
+  const [mustChangePassword, setMustChangePassword] = useState<boolean>(false);
+  const [newPassword, setNewPassword] = useState<string>('');
+  const [changingPassword, setChangingPassword] = useState<boolean>(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -48,6 +51,9 @@ export default function DashboardPage() {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         setAlexEthnicity(userData.alexEthnicity || 'English');
+        if (userData.mustChangePassword === true) {
+          setMustChangePassword(true);
+        }
       }
     } catch (error) {
       console.error('Error loading user preferences:', error);
@@ -139,6 +145,57 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {mustChangePassword && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md">
+              <h2 className="text-2xl font-bold text-[#0A2647] mb-4">Set a New Password</h2>
+              <p className="text-sm text-gray-600 mb-4">For your security, please set a new password now.</p>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent mb-4"
+              />
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setNewPassword('')}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 disabled:text-gray-400"
+                  disabled={changingPassword}
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!user) return;
+                    if ((newPassword || '').length < 8) {
+                      alert('Password must be at least 8 characters long.');
+                      return;
+                    }
+                    setChangingPassword(true);
+                    try {
+                      await updatePassword(user, newPassword);
+                      const userRef = doc(db, 'users', user.uid);
+                      await setDoc(userRef, { mustChangePassword: false }, { merge: true });
+                      setMustChangePassword(false);
+                      setNewPassword('');
+                      alert('Password updated successfully.');
+                    } catch (err) {
+                      console.error('Failed to update password:', err);
+                      alert('Failed to update password. Please try again.');
+                    } finally {
+                      setChangingPassword(false);
+                    }
+                  }}
+                  disabled={changingPassword}
+                  className="flex-1 px-4 py-2 bg-[#2C74B3] text-white rounded-lg hover:bg-[#205295] transition-colors disabled:opacity-50"
+                >
+                  {changingPassword ? 'Saving...' : 'Save Password'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
           {/* Wallet Display */}
           <div className="lg:col-span-1 min-h-[320px] flex">
