@@ -1,17 +1,15 @@
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment, useEffect, useState } from 'react';
-import { signOut } from 'firebase/auth';
+import { signOut, User } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import md5 from 'md5';
-import { RefreshCw, LayoutDashboard } from 'lucide-react';
+import { RefreshCw, LayoutDashboard, Shield } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { isAdmin } from '../lib/admin';
 
 interface UserDropdownProps {
-  user: {
-    email: string;
-    uid: string;
-  };
+  user: User;
   onRefresh?: () => void;
 }
 
@@ -76,6 +74,12 @@ export default function UserDropdown({ user, onRefresh }: UserDropdownProps) {
   const handleDashboard = () => {
     router.push('/dashboard');
   };
+
+  const handleAdmin = () => {
+    router.push('/admin');
+  };
+
+  const userIsAdmin = isAdmin(user);
 
   const gravatarUrl = `https://www.gravatar.com/avatar/${md5(user.email.toLowerCase().trim())}?d=mp`;
 
@@ -171,6 +175,21 @@ export default function UserDropdown({ user, onRefresh }: UserDropdownProps) {
                 </button>
               )}
             </Menu.Item>
+            {userIsAdmin && (
+              <Menu.Item>
+                {({ active }) => (
+                  <button
+                    onClick={handleAdmin}
+                    className={`${
+                      active ? 'bg-gray-800/80' : ''
+                    } text-yellow-400 w-full text-left px-3 py-2 text-sm rounded-md transition-colors duration-150 flex items-center space-x-2`}
+                  >
+                    <Shield className="w-4 h-4" />
+                    <span>Admin Panel</span>
+                  </button>
+                )}
+              </Menu.Item>
+            )}
             <Menu.Item>
               {({ active }) => (
                 <button

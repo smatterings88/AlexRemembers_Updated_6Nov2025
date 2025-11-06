@@ -1,34 +1,52 @@
 rules_version = '2';
 service cloud.firestore {
+  // Helper function to check if user is admin
+  function isAdmin() {
+    return request.auth != null && (
+      request.auth.token.email == 'mgzobel@icloud.com' ||
+      request.auth.token.email == 'kenergizer@mac.com'
+    );
+  }
+  
   match /databases/{database}/documents {
     match /users/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
+      // Users can read/update their own data, admins can do everything
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow create: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
     }
     
     // Top-level wallets collection
     match /wallets/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Users can read/write their own wallet, admins can do everything
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
     }
     
     match /usernames/{username} {
       allow read: if true;
       allow create: if request.auth != null;
+      allow delete: if isAdmin();
     }
 
     match /callmemory/{callId} {
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow update: if request.auth != null 
-        && resource.data.userId == request.auth.uid 
-        && request.resource.data.userId == request.auth.uid;
+      // Users can read their own call memory, admins can read all
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null && (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow update: if request.auth != null && (
+        (resource.data.userId == request.auth.uid && request.resource.data.userId == request.auth.uid) ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
     }
 
     match /callstats/{userId} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId;
-      allow update: if request.auth != null && request.auth.uid == userId;
+      // Users can read their own stats, admins can read all
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow create: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
     }
   }
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db } from '../../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { initWalletForUser, getWalletBalance } from '../../lib/wallet';
@@ -11,7 +11,7 @@ import UserDropdown from '../../components/UserDropdown';
 import { ArrowLeft, Settings, Globe, Bell, Shield } from 'lucide-react';
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [alexEthnicity, setAlexEthnicity] = useState<string>('English');

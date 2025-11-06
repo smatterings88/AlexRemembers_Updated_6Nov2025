@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { UltravoxSession } from 'ultravox-client';
 import { auth, db } from '../lib/firebase';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, getDoc, collection, query, where, orderBy, limit, getDocs, increment, addDoc } from 'firebase/firestore';
 import { initWalletForUser, logCall, getWalletBalance, hasInsufficientBalance } from '../lib/wallet';
 import AuthModals from '../components/AuthModals';
@@ -17,7 +17,7 @@ export default function HomePage() {
   const [isStarted, setIsStarted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showTranscripts, setShowTranscripts] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isSignInOpen, setIsSignInOpen] = useState(false);
   const [isSignUpOpen, setIsSignUpOpen] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
@@ -379,7 +379,8 @@ export default function HomePage() {
         const newStatus = uvSession.status;
         const prevStatus = previousStatusRef.current;
         
-        if (['connected', 'speaking', 'listening'].includes(newStatus)) {
+        // Track active statuses (idle means connected but not yet active)
+        if (['idle', 'speaking', 'listening', 'thinking'].includes(newStatus)) {
           lastActiveStatusRef.current = newStatus;
         }
         
@@ -390,7 +391,7 @@ export default function HomePage() {
         setStatus(newStatus);
         previousStatusRef.current = newStatus;
         
-        if (newStatus === 'connected' && connectionTimeoutRef.current) {
+        if (newStatus === 'idle' && connectionTimeoutRef.current) {
           clearTimeout(connectionTimeoutRef.current);
         }
       });
@@ -444,7 +445,9 @@ export default function HomePage() {
         }, 500);
       };
 
-      uvSession.joinCall(data.joinUrl);
+      // Include client version for tracking (optional but recommended)
+      const clientVersion = `alexlistens-web-${process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0'}`;
+      uvSession.joinCall(data.joinUrl, clientVersion);
       setSession(uvSession);
       setIsCallActive(true);
     } catch (err) {
@@ -468,12 +471,14 @@ export default function HomePage() {
 
     if (session) {
       try {
-        if (['connected', 'speaking', 'listening'].includes(session.status)) {
+        // Check if call is active before logging
+        if (['idle', 'speaking', 'listening', 'thinking'].includes(session.status)) {
           await logCallToWallet('MANUAL_END_CALL');
         }
         
-        if (['connected', 'speaking', 'listening'].includes(session.status)) {
-          session.leaveCall();
+        // Leave call and wait for it to complete (leaveCall returns a Promise)
+        if (['idle', 'speaking', 'listening', 'thinking', 'connecting'].includes(session.status)) {
+          await session.leaveCall();
         }
         setSession(null);
         setIsCallActive(false);
@@ -572,12 +577,16 @@ export default function HomePage() {
     switch (status) {
       case 'connecting':
         return 'Connecting to Alex...';
-      case 'connected':
+      case 'idle':
         return 'Connected with Alex';
+      case 'thinking':
+        return 'Alex is thinking...';
       case 'speaking':
         return 'Alex is speaking...';
       case 'listening':
         return 'Alex is listening...';
+      case 'disconnecting':
+        return 'Ending call...';
       case 'disconnected':
         return 'Ready to chat';
       default:
@@ -589,12 +598,16 @@ export default function HomePage() {
     switch (status) {
       case 'connecting':
         return <Radio className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500 animate-pulse" />;
-      case 'connected':
+      case 'idle':
         return <Radio className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />;
+      case 'thinking':
+        return <Radio className="w-4 h-4 sm:w-5 sm:h-5 text-purple-500 animate-pulse" />;
       case 'speaking':
         return <Radio className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 animate-pulse" />;
       case 'listening':
         return <Mic className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 animate-pulse" />;
+      case 'disconnecting':
+        return <Radio className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 animate-pulse" />;
       case 'disconnected':
       default:
         return <MicOff className="w-4 h-4 sm:w-5 sm:h-5 text-gray-500" />;
@@ -609,9 +622,11 @@ export default function HomePage() {
         </div>
         <span className={`text-xs sm:text-sm ${
           status === 'connecting' ? 'text-yellow-600' :
-          status === 'connected' ? 'text-blue-600' :
+          status === 'idle' ? 'text-blue-600' :
+          status === 'thinking' ? 'text-purple-600' :
           status === 'speaking' ? 'text-blue-600' :
           status === 'listening' ? 'text-green-600' :
+          status === 'disconnecting' ? 'text-orange-600' :
           'text-gray-600'
         }`}>
           {getStatusText()}
