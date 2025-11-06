@@ -254,3 +254,15 @@ export async function initializePineconeIndex(): Promise<void> {
   }
 }
 
+// Ensure Pinecone index is initialized once per runtime
+let pineconeInitialized = false;
+export async function ensurePineconeReady(): Promise<void> {
+  if (pineconeInitialized) return;
+  await initializePineconeIndex().catch((err) => {
+    // Do not mark as initialized if init failed
+    console.error('Pinecone init error:', err);
+    throw err;
+  });
+  pineconeInitialized = true;
+}
+

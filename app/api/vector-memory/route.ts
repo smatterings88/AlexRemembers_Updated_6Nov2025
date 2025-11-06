@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRelevantContext, storeConversationMemory } from '@/lib/vector-memory';
+import { getRelevantContext, storeConversationMemory, ensurePineconeReady } from '@/lib/vector-memory';
 
 export async function POST(request: NextRequest) {
   try {
+    // Ensure Pinecone index exists (runs once per runtime)
+    await ensurePineconeReady();
+
     const body = await request.json();
     const { userId, queryText, action, callId, transcripts } = body;
 

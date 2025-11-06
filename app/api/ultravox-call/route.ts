@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRelevantContext } from '@/lib/vector-memory';
+import { getRelevantContext, ensurePineconeReady } from '@/lib/vector-memory';
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +17,11 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Ensure Pinecone is ready (index exists) before any vector operations
+    await ensurePineconeReady().catch(() => {
+      // Continue without vector search if initialization fails
+    });
 
     // Get request body
     const body = await request.json();
