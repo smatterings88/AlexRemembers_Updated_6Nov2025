@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getRelevantContext } from '@/lib/vector-memory';
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +20,22 @@ export async function POST(request: NextRequest) {
 
     // Get request body
     const body = await request.json();
-    const { firstName, lastCallTranscript, currentTime, userLocation, totalCalls, alexEthnicity, walletBalance } = body;
+    const { firstName, lastCallTranscript, currentTime, userLocation, totalCalls, alexEthnicity, walletBalance, userId, conversationQuery } = body;
+
+    // Use vector memory to get relevant context if available
+    let relevantContext = lastCallTranscript || 'No previous call. This is the first call';
+    
+    if (userId && conversationQuery) {
+      try {
+        const vectorContext = await getRelevantContext(userId, conversationQuery, 3);
+        if (vectorContext && vectorContext !== 'No previous conversation history available.') {
+          relevantContext = vectorContext;
+        }
+      } catch (error) {
+        console.error('Error getting vector context, falling back to lastCallTranscript:', error);
+        // Fallback to lastCallTranscript if vector search fails
+      }
+    }
 
     // Use wallet balance passed from client for maxDuration
     let maxDurationSeconds = 3600; // Default 1 hour
@@ -72,7 +88,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         templateContext: {
           userFirstname: firstName || 'User',
-          lastCallTranscript: lastCallTranscript || 'No previous call. This is the first call',
+          lastCallTranscript: relevantContext,
           currentTime: currentTime || new Date().toLocaleTimeString(),
           userLocation: userLocation || 'Unknown Location',
           userTotalCalls: totalCalls?.toString() || '0'
