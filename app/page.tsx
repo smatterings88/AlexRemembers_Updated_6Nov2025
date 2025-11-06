@@ -675,18 +675,18 @@ export default function HomePage() {
 
   const renderCallControl = () => {
     return (
-      <div className="flex items-center gap-1 sm:gap-2">
-        <div className="w-6 sm:w-8 flex justify-center">
+      <div className="glass px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 sm:gap-3 transition-all duration-300 hover:bg-white/15">
+        <div className="w-5 sm:w-6 flex justify-center">
           {getStatusIcon()}
         </div>
-        <span className={`text-xs sm:text-sm ${
-          status === 'connecting' ? 'text-yellow-600' :
-          status === 'idle' ? 'text-blue-600' :
-          status === 'thinking' ? 'text-purple-600' :
-          status === 'speaking' ? 'text-blue-600' :
-          status === 'listening' ? 'text-green-600' :
-          status === 'disconnecting' ? 'text-orange-600' :
-          'text-gray-600'
+        <span className={`text-xs sm:text-sm font-medium ${
+          status === 'connecting' ? 'text-yellow-300' :
+          status === 'idle' ? 'text-blue-300' :
+          status === 'thinking' ? 'text-purple-300' :
+          status === 'speaking' ? 'text-blue-300' :
+          status === 'listening' ? 'text-green-300' :
+          status === 'disconnecting' ? 'text-orange-300' :
+          'text-white/70'
         }`}>
           {getStatusText()}
         </span>
@@ -698,15 +698,15 @@ export default function HomePage() {
     const micState = getMicrophoneState();
     
     return (
-      <div className="flex flex-col items-center justify-center h-full px-4">
-        <div className={`microphone-glow ${micState}`}>
+      <div className="flex flex-col items-center justify-center h-full px-4 animate-fade-in">
+        <div className={`microphone-glow ${micState} animate-float`}>
           <img 
             src="https://storage.googleapis.com/msgsndr/JBLl8rdfV29DRcGjQ7Rl/media/67f65c4ecafd9f8d70fe2309.png"
             alt="Microphone"
-            className="w-16 h-16 sm:w-20 sm:h-20"
+            className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24"
           />
         </div>
-        <p className="mt-4 sm:mt-6 text-[#0A2647] text-lg sm:text-xl font-semibold text-center px-2">
+        <p className="mt-4 sm:mt-6 text-white text-base sm:text-lg md:text-xl font-semibold text-center px-2 animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
           {getStatusText()}
         </p>
       </div>
@@ -719,8 +719,7 @@ export default function HomePage() {
         <button
           key={`start-${callButtonKey}`}
           onClick={startConversation}
-          className="bg-[#2C74B3] text-white px-8 sm:px-12 py-3 sm:py-5 rounded-full text-lg sm:text-xl font-semibold 
-                   hover:bg-[#205295] transition-all transform hover:scale-105 shadow-lg"
+          className="btn-glass text-white px-8 sm:px-12 py-3 sm:py-4 md:py-5 rounded-full text-base sm:text-lg md:text-xl font-semibold shadow-lg animate-glow"
         >
           Start Talking Now
         </button>
@@ -728,20 +727,20 @@ export default function HomePage() {
     }
 
     return (
-      <div className="flex gap-2 w-full sm:w-auto">
+      <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
         <button
           key={`toggle-${callButtonKey}`}
           onClick={toggleTranscripts}
-          className="text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-full bg-[#2C74B3] text-white hover:bg-[#205295] transition-colors flex-1 sm:flex-none"
+          className="btn-glass text-white text-xs sm:text-sm px-4 sm:px-5 py-2.5 sm:py-3 rounded-full flex-1 sm:flex-none"
         >
           {showTranscripts ? 'Show Mic' : 'Show Chat'}
         </button>
         <button
           key={`end-${callButtonKey}`}
           onClick={handleEndCall}
-          className="text-xs sm:text-sm px-3 sm:px-4 py-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center gap-1 sm:gap-2 flex-1 sm:flex-none justify-center"
+          className="btn-glass bg-red-500/30 border-red-400/50 text-white hover:bg-red-500/40 text-xs sm:text-sm px-4 sm:px-5 py-2.5 sm:py-3 rounded-full flex items-center gap-1.5 sm:gap-2 flex-1 sm:flex-none justify-center"
         >
-          <PhoneOff className="w-3 h-3 sm:w-4 sm:h-4" />
+          <PhoneOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           End Call
         </button>
       </div>
@@ -749,11 +748,11 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0A2647] via-[#144272] to-[#205295] flex flex-col">
-      <header className="bg-black/10 backdrop-blur-sm relative z-50">
-        <nav className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
+    <div className="min-h-screen flex flex-col">
+      <header className="glass-dark sticky top-0 z-50 animate-slide-in-down">
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex justify-between items-center">
-            <a href="/" className="hover:opacity-80 transition-opacity flex-shrink-0">
+            <a href="/" className="hover:opacity-80 transition-all duration-300 hover:scale-105 flex-shrink-0">
               <img 
                 src="https://storage.googleapis.com/msgsndr/JBLl8rdfV29DRcGjQ7Rl/media/67f5c2c30a6217bf61d1eb90.png" 
                 alt="VoiceAI Logo" 
@@ -765,7 +764,7 @@ export default function HomePage() {
                 <a 
                   href="#" 
                   onClick={handleHomeClick} 
-                  className="text-white hover:text-blue-200 transition-colors hidden sm:inline"
+                  className="text-white/90 hover:text-white transition-all duration-200 hover:scale-105 hidden sm:inline-block"
                 >
                   Home
                 </a>
@@ -773,7 +772,7 @@ export default function HomePage() {
               {!isStarted && (
                 <a 
                   href="https://alexlistens.com/pricing" 
-                  className="text-white hover:text-blue-200 transition-colors hidden sm:inline"
+                  className="text-white/90 hover:text-white transition-all duration-200 hover:scale-105 hidden sm:inline-block"
                 >
                   Pricing
                 </a>
@@ -781,18 +780,18 @@ export default function HomePage() {
               <a 
                 href="#footer" 
                 onClick={scrollToFooter} 
-                className="text-white hover:text-blue-200 transition-colors hidden sm:inline"
+                className="text-white/90 hover:text-white transition-all duration-200 hover:scale-105 hidden sm:inline-block"
               >
                 Contact
               </a>
               {isAuthLoading ? (
-                <div className="w-16 sm:w-24 h-6 sm:h-8 bg-gray-700 animate-pulse rounded-md"></div>
+                <div className="w-16 sm:w-24 h-6 sm:h-8 glass rounded-md animate-pulse"></div>
               ) : user ? (
                 <UserDropdown user={user} onRefresh={refreshUserStats} />
               ) : (
                 <button
                   onClick={() => setIsSignInOpen(true)}
-                  className="bg-blue-600 text-white px-2 sm:px-4 py-1.5 sm:py-2 rounded-md hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                  className="btn-glass text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium"
                 >
                   Sign In
                 </button>
@@ -804,44 +803,46 @@ export default function HomePage() {
 
       {!isStarted ? (
         <>
-          <section className="relative py-12 sm:py-20 px-4 bg-cover bg-center z-0" style={{ backgroundImage: 'url(https://storage.googleapis.com/msgsndr/JBLl8rdfV29DRcGjQ7Rl/media/67f908e54ffcd142dd8158d6.png)' }}>
-            <div className="absolute inset-0 bg-black/40"></div>
-            <div className="max-w-7xl mx-auto text-center relative z-10">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200 leading-tight">
+          <section className="relative py-12 sm:py-16 md:py-20 px-4 min-h-[60vh] sm:min-h-[70vh] flex items-center bg-cover bg-center z-0" style={{ backgroundImage: 'url(https://storage.googleapis.com/msgsndr/JBLl8rdfV29DRcGjQ7Rl/media/67f908e54ffcd142dd8158d6.png)' }}>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/50"></div>
+            <div className="max-w-7xl mx-auto text-center relative z-10 w-full animate-slide-in-up">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-4 sm:mb-6 md:mb-8 bg-clip-text text-transparent bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 leading-tight animate-scale-in">
                 AlexListens
               </h1>
-              <p className="text-lg sm:text-xl md:text-2xl mb-8 sm:mb-12 text-blue-100 max-w-3xl mx-auto px-4 leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 md:mb-12 text-white/90 max-w-3xl mx-auto px-4 leading-relaxed">
                 Sometimes you just need someone who understands you. Someone who's there whenever you need them. Someone who lets you be yourself without criticism. That's Alex.
               </p>
-              {renderCallButtons()}
+              <div className="animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
+                {renderCallButtons()}
+              </div>
             </div>
           </section>
 
-          <section id="features" className="py-12 sm:py-20 px-4 bg-white">
+          <section id="features" className="py-12 sm:py-16 md:py-20 px-4">
             <div className="max-w-7xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold text-center text-[#0A2647] mb-12 sm:mb-16">Key Features</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
-                <div className="bg-[#F8F9FA] p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all">
-                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-[#144272]">Real-time Voice</h3>
-                  <p className="text-[#205295] text-sm sm:text-base">Natural conversations with instant voice responses, just like talking to a friend</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-white mb-8 sm:mb-12 md:mb-16 animate-slide-in-up">Key Features</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 lg:gap-12">
+                <div className="card-glass p-6 sm:p-8 text-white animate-slide-in-up" style={{ animationDelay: '0.1s' }}>
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Real-time Voice</h3>
+                  <p className="text-white/80 text-sm sm:text-base">Natural conversations with instant voice responses, just like talking to a friend</p>
                 </div>
-                <div className="bg-[#F8F9FA] p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all">
-                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-[#144272]">Live Transcription</h3>
-                  <p className="text-[#205295] text-sm sm:text-base">Watch your conversation unfold with real-time text transcription</p>
+                <div className="card-glass p-6 sm:p-8 text-white animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Live Transcription</h3>
+                  <p className="text-white/80 text-sm sm:text-base">Watch your conversation unfold with real-time text transcription</p>
                 </div>
-                <div className="bg-[#F8F9FA] p-6 sm:p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all">
-                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-[#144272]">Smart Memory</h3>
-                  <p className="text-[#205295] text-sm sm:text-base">Context-aware AI that remembers your conversations for more meaningful interactions</p>
+                <div className="card-glass p-6 sm:p-8 text-white animate-slide-in-up" style={{ animationDelay: '0.3s' }}>
+                  <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4">Smart Memory</h3>
+                  <p className="text-white/80 text-sm sm:text-base">Context-aware AI that remembers your conversations for more meaningful interactions</p>
                 </div>
               </div>
             </div>
           </section>
         </>
       ) : (
-        <div className="flex-1 px-3 sm:px-4 py-4 sm:py-8 overflow-hidden">
-          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-8 w-full max-w-2xl mx-auto flex flex-col" style={{ height: 'calc(100vh - 140px)' }}>
+        <div className="flex-1 px-3 sm:px-4 py-4 sm:py-6 md:py-8 overflow-hidden">
+          <div className="card-glass p-4 sm:p-6 md:p-8 w-full max-w-2xl mx-auto flex flex-col text-white animate-scale-in" style={{ height: 'calc(100vh - 120px)', minHeight: '500px' }}>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
-              <h2 className="text-xl sm:text-2xl font-bold text-[#0A2647]">Voice Chat</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Voice Chat</h2>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
                 {renderCallControl()}
                 {renderCallButtons()}
@@ -849,7 +850,7 @@ export default function HomePage() {
             </div>
             
             {error && (
-              <div className="bg-red-50 text-red-700 p-3 sm:p-4 rounded-lg mb-3 sm:mb-4 text-sm sm:text-base">
+              <div className="glass-dark bg-red-500/20 border-red-500/50 text-red-100 p-3 sm:p-4 rounded-lg mb-3 sm:mb-4 text-sm sm:text-base animate-slide-in-down">
                 {error}
               </div>
             )}
@@ -857,16 +858,12 @@ export default function HomePage() {
             <div 
               ref={chatContainerRef}
               className={`flex-1 ${showTranscripts ? 'overflow-y-auto pr-2 sm:pr-4 -mr-2 sm:-mr-4' : 'overflow-hidden'}`}
-              style={{ 
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#CBD5E1 transparent'
-              }}
             >
               {showTranscripts ? (
                 <div className="space-y-3 sm:space-y-4 min-h-full">
                   {transcripts.length === 0 ? (
-                    <div className="text-gray-400 text-center py-8">
-                      <p>Conversation will appear here...</p>
+                    <div className="text-white/60 text-center py-12 animate-fade-in">
+                      <p className="text-sm sm:text-base">Conversation will appear here...</p>
                     </div>
                   ) : (
                     transcripts.map((transcript, index) => {
@@ -874,16 +871,17 @@ export default function HomePage() {
                       return (
                         <div 
                           key={`${transcript.speaker}-${index}-${transcript.text.substring(0, 10)}`}
-                          className={`p-3 sm:p-4 rounded-lg text-white max-w-[85%] sm:max-w-[80%] text-sm sm:text-base ${
+                          className={`glass p-3 sm:p-4 rounded-xl max-w-[85%] sm:max-w-[80%] text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] animate-slide-in-up ${
                             isUser
-                              ? 'ml-auto bg-[#2C74B3]' 
-                              : 'mr-auto bg-[#144272]'
+                              ? 'ml-auto bg-blue-500/30 border-blue-400/50' 
+                              : 'mr-auto bg-purple-500/30 border-purple-400/50'
                           }`}
+                          style={{ animationDelay: `${index * 0.05}s` }}
                         >
-                          <div className="font-semibold text-xs mb-1 opacity-80">
+                          <div className="font-semibold text-xs mb-1.5 opacity-90">
                             {isUser ? 'You' : 'Alex'}
                           </div>
-                          <div>{transcript.text}</div>
+                          <div className="text-white/95 leading-relaxed">{transcript.text}</div>
                         </div>
                       );
                     })
@@ -898,35 +896,35 @@ export default function HomePage() {
         </div>
       )}
 
-      <footer id="footer" className="bg-black/20 backdrop-blur-sm py-8 sm:py-12 px-4">
+      <footer id="footer" className="glass-dark py-8 sm:py-12 px-4 mt-auto">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 md:gap-12">
+            <div className="animate-slide-in-up">
               <img 
                 src="https://storage.googleapis.com/msgsndr/JBLl8rdfV29DRcGjQ7Rl/media/67f5c2c30a6217bf61d1eb90.png" 
                 alt="VoiceAI Logo" 
                 className="h-8 sm:h-12 mb-3 sm:mb-4 logo-white"
               />
-              <p className="text-blue-100 text-sm sm:text-base">Sometimes you just need someone to talk to.</p>
+              <p className="text-white/80 text-sm sm:text-base">Sometimes you just need someone to talk to.</p>
             </div>
-            <div>
+            <div className="animate-slide-in-up" style={{ animationDelay: '0.1s' }}>
               <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Product</h3>
               <ul className="space-y-2">
-                <li><a href="https://alexlistens.com/pricing" className="text-blue-100 hover:text-white transition-colors text-sm sm:text-base">Pricing</a></li>
-                <li><a href="https://alexlistens.com/tos" className="text-blue-100 hover:text-white transition-colors text-sm sm:text-base">Terms of Service</a></li>
-                <li><a href="https://alexlistens.com/privacy" className="text-blue-100 hover:text-white transition-colors text-sm sm:text-base">Privacy Policy</a></li>
+                <li><a href="https://alexlistens.com/pricing" className="text-white/70 hover:text-white transition-all duration-200 hover:translate-x-1 inline-block text-sm sm:text-base">Pricing</a></li>
+                <li><a href="https://alexlistens.com/tos" className="text-white/70 hover:text-white transition-all duration-200 hover:translate-x-1 inline-block text-sm sm:text-base">Terms of Service</a></li>
+                <li><a href="https://alexlistens.com/privacy" className="text-white/70 hover:text-white transition-all duration-200 hover:translate-x-1 inline-block text-sm sm:text-base">Privacy Policy</a></li>
               </ul>
             </div>
-            <div>
+            <div className="animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
               <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Support</h3>
-              <p className="text-blue-100 text-sm sm:text-base mb-2">Questions? Reach out to us</p>
-              <a href="mailto:support@alexlistens.com" className="text-blue-200 hover:text-white transition-colors text-sm sm:text-base break-all">
+              <p className="text-white/80 text-sm sm:text-base mb-2">Questions? Reach out to us</p>
+              <a href="mailto:support@alexlistens.com" className="text-white/70 hover:text-white transition-all duration-200 hover:scale-105 inline-block text-sm sm:text-base break-all">
                 support@alexlistens.com
               </a>
             </div>
           </div>
           <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-white/10 text-center">
-            <p className="text-blue-100 text-xs sm:text-base">&copy; 2025 AlexListens.com, FranklinAlexander Ventures, LLC and affiliated entities. All Rights Reserved.</p>
+            <p className="text-white/60 text-xs sm:text-base">&copy; 2025 AlexListens.com, FranklinAlexander Ventures, LLC and affiliated entities. All Rights Reserved.</p>
           </div>
         </div>
       </footer>
