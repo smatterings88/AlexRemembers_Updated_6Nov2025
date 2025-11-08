@@ -12,6 +12,7 @@ AlexListens is an advanced AI voice assistant that provides natural, empathetic 
 - 💰 Wallet-based call time management
 - 🌍 Multi-language support (English, Spanish, Australian)
 - 👥 Admin panel for user management
+ - 👤 Admin create-user (temp password) with forced first login password change
 
 ## Tech Stack
 
@@ -69,17 +70,24 @@ PINECONE_INDEX_NAME=alexlistens-memories  # Optional, defaults to 'alexlistens-m
 
 # Get OpenAI API key from: https://platform.openai.com/
 OPENAI_API_KEY=your_openai_api_key
+
+# Firebase Admin (Server-side only; do NOT use NEXT_PUBLIC_)
+# Get by: Firebase Console → Project Settings → Service accounts → Generate new private key
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxx@your_project_id.iam.gserviceaccount.com
+# Paste as a single line with literal \n in hosted envs like Vercel
+FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nMIIEv...snip...\n-----END PRIVATE KEY-----\n
 ```
 
 ## Architecture
 
-This application uses a **client-side only** architecture for Firebase with server-side Ultravox integration:
+This application uses a **client-first** architecture for Firebase with server-side integration for Ultravox and Admin operations:
 
 - **Firebase Web SDK**: All Firebase operations run in the browser
 - **Client-side wallet balance**: Wallet balance is read client-side and passed to API routes
 - **Server-side Ultravox calls**: Ultravox API calls are made through Next.js API routes (`/api/ultravox-call`) for security
 - **Firestore Security Rules**: Data access is controlled via Firestore security rules with admin support
-- **No server-side Firebase**: No Firebase Admin SDK or server-side Firebase operations
+- **Server-side Admin**: Secure Next.js route uses Firebase Admin SDK for privileged actions (e.g., create user)
 
 ## Key Features
 
@@ -93,9 +101,16 @@ This application uses a **client-side only** architecture for Firebase with serv
 - **Super Admin Access**: Only accessible to configured admin emails
 - View all users and their statistics
 - Manage user wallets (add minutes)
+- Create users with temporary password (auto-initializes wallet with 10 minutes)
 - System-wide statistics
 - Search and filter users
 - Access to all call data
+
+Admin API routes:
+- `POST /api/admin/create-user`
+  - Body: `{ email, firstName?, lastName?, username? }`
+  - Returns: `{ uid, email, tempPassword }`
+  - Auth: Requires Firebase ID token from an admin email (checked server-side)
 
 ### Wallet System
 - New users receive 10 minutes (600 seconds) upon signup
@@ -110,6 +125,11 @@ Users can select their preferred conversation language:
 - **Australian English**
 
 The system automatically uses the appropriate Ultravox agent based on user preference.
+
+### Forced Password Change on First Login
+- Users created by an admin are flagged with `mustChangePassword: true` in `users/{uid}`.
+- On their first login, the dashboard prompts for a new password.
+- After a successful update, `mustChangePassword` is set to `false`.
 
 ## Environment Variable Setup
 
@@ -179,8 +199,13 @@ To add or modify admin emails, update both files.
 ├── lib/                # Utility functions
 │   ├── admin.ts        # Admin utilities
 │   ├── firebase.ts     # Firebase config
+│   ├── firebase-admin.ts # Firebase Admin SDK init (server only)
 │   ├── vector-memory.ts # Vector memory service (Pinecone + OpenAI)
 │   └── wallet.ts       # Wallet functions
+├── app/
+│   └── api/
+│       └── admin/
+│           └── create-user/route.ts  # Admin user creation endpoint
 └── firestore.rules     # Firestore security rules
 ```
 

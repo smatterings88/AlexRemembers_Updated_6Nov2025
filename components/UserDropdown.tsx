@@ -123,7 +123,7 @@ export default function UserDropdown({ user, onRefresh }: UserDropdownProps) {
         leaveFrom="transform opacity-100 scale-100"
         leaveTo="transform opacity-0 scale-95"
       >
-        <Menu.Items className="absolute right-0 mt-3 w-56 sm:w-64 origin-top-right rounded-xl bg-gray-900/95 backdrop-blur-sm border border-gray-700/50 shadow-xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+        <Menu.Items className="popover-glass absolute right-0 mt-3 w-56 sm:w-64 origin-top-right rounded-2xl bg-gray-900/95 backdrop-blur-xl border border-white/20 shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
           <div className="px-3 sm:px-4 py-3 sm:py-4 border-b border-gray-700/50">
             {isLoading ? (
               <div className="space-y-3 sm:space-y-4">

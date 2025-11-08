@@ -675,11 +675,11 @@ export default function HomePage() {
 
   const renderCallControl = () => {
     return (
-      <div className="glass px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 sm:gap-3 transition-all duration-300 hover:bg-white/15">
-        <div className="w-5 sm:w-6 flex justify-center">
+      <div className="glass-lozenge px-3 sm:px-4 py-2 rounded-2xl flex items-center gap-2 sm:gap-3 transition-all duration-300 hover:bg-white/15 hover:scale-105 animate-float-gentle">
+        <div className="w-5 sm:w-6 flex justify-center relative z-10">
           {getStatusIcon()}
         </div>
-        <span className={`text-xs sm:text-sm font-medium ${
+        <span className={`text-xs sm:text-sm font-medium relative z-10 ${
           status === 'connecting' ? 'text-yellow-300' :
           status === 'idle' ? 'text-blue-300' :
           status === 'thinking' ? 'text-purple-300' :
@@ -719,7 +719,7 @@ export default function HomePage() {
         <button
           key={`start-${callButtonKey}`}
           onClick={startConversation}
-          className="btn-glass text-white px-8 sm:px-12 py-3 sm:py-4 md:py-5 rounded-full text-base sm:text-lg md:text-xl font-semibold shadow-lg animate-glow"
+          className="btn-glass text-white px-8 sm:px-12 py-3 sm:py-4 md:py-5 rounded-full text-base sm:text-lg md:text-xl font-semibold shadow-lg animate-glow animate-float-gentle"
         >
           Start Talking Now
         </button>
@@ -738,7 +738,7 @@ export default function HomePage() {
         <button
           key={`end-${callButtonKey}`}
           onClick={handleEndCall}
-          className="btn-glass bg-red-500/30 border-red-400/50 text-white hover:bg-red-500/40 text-xs sm:text-sm px-4 sm:px-5 py-2.5 sm:py-3 rounded-full flex items-center gap-1.5 sm:gap-2 flex-1 sm:flex-none justify-center"
+          className="btn-glass bg-red-500/20 border-red-400/40 text-white hover:bg-red-500/30 hover:border-red-400/50 text-xs sm:text-sm px-4 sm:px-5 py-2.5 sm:py-3 rounded-full flex items-center gap-1.5 sm:gap-2 flex-1 sm:flex-none justify-center"
         >
           <PhoneOff className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           End Call
@@ -759,12 +759,12 @@ export default function HomePage() {
                 className="h-8 sm:h-12 logo-white"
               />
             </a>
-            <div className="flex gap-2 sm:gap-4 lg:gap-8 items-center text-sm sm:text-base">
+            <div className="flex gap-2 sm:gap-3 lg:gap-4 items-center text-sm sm:text-base">
               {isStarted && (
                 <a 
                   href="#" 
                   onClick={handleHomeClick} 
-                  className="text-white/90 hover:text-white transition-all duration-200 hover:scale-105 hidden sm:inline-block"
+                  className="nav-glass text-white/90 hover:text-white transition-all duration-300 hover:scale-105 hidden sm:inline-block"
                 >
                   Home
                 </a>
@@ -772,7 +772,7 @@ export default function HomePage() {
               {!isStarted && (
                 <a 
                   href="https://alexlistens.com/pricing" 
-                  className="text-white/90 hover:text-white transition-all duration-200 hover:scale-105 hidden sm:inline-block"
+                  className="nav-glass text-white/90 hover:text-white transition-all duration-300 hover:scale-105 hidden sm:inline-block"
                 >
                   Pricing
                 </a>
@@ -780,7 +780,7 @@ export default function HomePage() {
               <a 
                 href="#footer" 
                 onClick={scrollToFooter} 
-                className="text-white/90 hover:text-white transition-all duration-200 hover:scale-105 hidden sm:inline-block"
+                className="nav-glass text-white/90 hover:text-white transition-all duration-300 hover:scale-105 hidden sm:inline-block"
               >
                 Contact
               </a>
@@ -791,7 +791,7 @@ export default function HomePage() {
               ) : (
                 <button
                   onClick={() => setIsSignInOpen(true)}
-                  className="btn-glass text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg text-sm sm:text-base font-medium"
+                  className="btn-glass text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-sm sm:text-base font-medium"
                 >
                   Sign In
                 </button>
@@ -840,7 +840,7 @@ export default function HomePage() {
         </>
       ) : (
         <div className="flex-1 px-3 sm:px-4 py-4 sm:py-6 md:py-8 overflow-hidden">
-          <div className="card-glass p-4 sm:p-6 md:p-8 w-full max-w-2xl mx-auto flex flex-col text-white animate-scale-in" style={{ height: 'calc(100vh - 120px)', minHeight: '500px' }}>
+          <div className="card-glass p-4 sm:p-6 md:p-8 w-full max-w-2xl mx-auto flex flex-col text-white animate-scale-in animate-float-gentle" style={{ height: 'calc(100vh - 120px)', minHeight: '500px' }}>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-4">
               <h2 className="text-xl sm:text-2xl font-bold text-white">Voice Chat</h2>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
@@ -871,17 +871,17 @@ export default function HomePage() {
                       return (
                         <div 
                           key={`${transcript.speaker}-${index}-${transcript.text.substring(0, 10)}`}
-                          className={`glass p-3 sm:p-4 rounded-xl max-w-[85%] sm:max-w-[80%] text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] animate-slide-in-up ${
+                          className={`glass-bubble p-3 sm:p-4 rounded-2xl max-w-[85%] sm:max-w-[80%] text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] animate-slide-in-up ${
                             isUser
-                              ? 'ml-auto bg-blue-500/30 border-blue-400/50' 
-                              : 'mr-auto bg-purple-500/30 border-purple-400/50'
+                              ? 'ml-auto bg-blue-500/20 border-blue-400/40' 
+                              : 'mr-auto bg-purple-500/20 border-purple-400/40'
                           }`}
                           style={{ animationDelay: `${index * 0.05}s` }}
                         >
-                          <div className="font-semibold text-xs mb-1.5 opacity-90">
+                          <div className="font-semibold text-xs mb-1.5 opacity-90 relative z-10">
                             {isUser ? 'You' : 'Alex'}
                           </div>
-                          <div className="text-white/95 leading-relaxed">{transcript.text}</div>
+                          <div className="text-white/95 leading-relaxed relative z-10">{transcript.text}</div>
                         </div>
                       );
                     })

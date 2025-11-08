@@ -411,8 +411,8 @@ export default function AdminPage() {
 
       {/* Add Minutes Modal */}
       {selectedUser && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="popover-glass bg-white/95 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md text-gray-900">
             <h2 className="text-2xl font-bold text-[#0A2647] mb-4">Manage Wallet</h2>
             <div className="mb-4">
               <p className="text-sm text-gray-600 mb-2">User: {selectedUser.email}</p>
@@ -427,7 +427,7 @@ export default function AdminPage() {
                 min="1"
                 value={minutesToAdd}
                 onChange={(e) => setMinutesToAdd(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent text-gray-900 placeholder:text-gray-400 bg-white"
+                className="input-glass w-full px-4 py-2 border border-gray-300/50 rounded-xl focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent text-gray-900 placeholder:text-gray-400 bg-white/80"
                 placeholder="Enter minutes"
               />
             </div>
@@ -445,7 +445,7 @@ export default function AdminPage() {
               <button
                 onClick={handleAddMinutes}
                 disabled={addingMinutes}
-                className="flex-1 px-4 py-2 bg-[#2C74B3] text-white rounded-lg hover:bg-[#205295] transition-colors disabled:opacity-50"
+                className="btn-glass flex-1 px-4 py-2 bg-[#2C74B3]/80 text-white rounded-xl hover:bg-[#205295]/80 transition-colors disabled:opacity-50"
               >
                 {addingMinutes ? 'Adding...' : 'Add Minutes'}
               </button>
@@ -456,8 +456,8 @@ export default function AdminPage() {
 
       {/* Create User Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="popover-glass bg-white/95 text-gray-900 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md">
             <h2 className="text-2xl font-bold text-[#0A2647] mb-4">Create New User</h2>
 
             <div className="space-y-3 mb-4">
@@ -467,7 +467,7 @@ export default function AdminPage() {
                   type="email"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent"
+                  className="input-glass w-full px-4 py-2 border border-gray-300/50 rounded-xl focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent text-gray-900 placeholder:text-gray-400 bg-white/80"
                   placeholder="user@example.com"
                 />
               </div>
@@ -478,7 +478,7 @@ export default function AdminPage() {
                     type="text"
                     value={newFirstName}
                     onChange={(e) => setNewFirstName(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent"
+                    className="input-glass w-full px-4 py-2 border border-gray-300/50 rounded-xl focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent text-gray-900 placeholder:text-gray-400 bg-white/80"
                     placeholder="First name"
                   />
                 </div>
@@ -488,7 +488,7 @@ export default function AdminPage() {
                     type="text"
                     value={newLastName}
                     onChange={(e) => setNewLastName(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent"
+                    className="input-glass w-full px-4 py-2 border border-gray-300/50 rounded-xl focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent text-gray-900 placeholder:text-gray-400 bg-white/80"
                     placeholder="Last name"
                   />
                 </div>
@@ -499,7 +499,7 @@ export default function AdminPage() {
                   type="text"
                   value={newUsername}
                   onChange={(e) => setNewUsername(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent"
+                  className="input-glass w-full px-4 py-2 border border-gray-300/50 rounded-xl focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent text-gray-900 placeholder:text-gray-400 bg-white/80"
                   placeholder="username"
                 />
               </div>
@@ -552,7 +552,7 @@ export default function AdminPage() {
               <button
                 onClick={handleCreateUser}
                 disabled={creating}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="btn-glass flex-1 px-4 py-2 bg-green-600/80 text-white rounded-xl hover:bg-green-700/80 transition-colors disabled:opacity-50"
               >
                 {creating ? 'Creating...' : 'Create User'}
               </button>

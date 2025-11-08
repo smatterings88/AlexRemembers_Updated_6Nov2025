@@ -146,8 +146,8 @@ export default function DashboardPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {mustChangePassword && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 w-full max-w-md">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="popover-glass bg-white/95 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md text-gray-900">
               <h2 className="text-2xl font-bold text-[#0A2647] mb-4">Set a New Password</h2>
               <p className="text-sm text-gray-600 mb-4">For your security, please set a new password now.</p>
               <input
@@ -155,7 +155,7 @@ export default function DashboardPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Enter new password"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent mb-4"
+                className="input-glass w-full px-4 py-2 border border-gray-300/50 rounded-xl focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent mb-4 bg-white/80"
               />
               <div className="flex gap-3">
                 <button
@@ -188,7 +188,7 @@ export default function DashboardPage() {
                     }
                   }}
                   disabled={changingPassword}
-                  className="flex-1 px-4 py-2 bg-[#2C74B3] text-white rounded-lg hover:bg-[#205295] transition-colors disabled:opacity-50"
+                  className="btn-glass flex-1 px-4 py-2 bg-[#2C74B3]/80 text-white rounded-xl hover:bg-[#205295]/80 transition-colors disabled:opacity-50"
                 >
                   {changingPassword ? 'Saving...' : 'Save Password'}
                 </button>
@@ -232,7 +232,7 @@ export default function DashboardPage() {
                 <div className="mt-auto pt-4">
                   <button
                     onClick={handleBackToHome}
-                    className="w-full bg-[#2C74B3] text-white py-3 px-4 rounded-lg hover:bg-[#205295] transition-colors font-medium"
+                    className="btn-glass w-full bg-[#2C74B3]/80 text-white py-3 px-4 rounded-xl hover:bg-[#205295]/80 transition-colors font-medium"
                   >
                     Start New Call
                   </button>
@@ -261,7 +261,7 @@ export default function DashboardPage() {
                 <select 
                   value={alexEthnicity}
                   onChange={(e) => setAlexEthnicity(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent text-gray-800 bg-white"
+                  className="input-glass w-full p-3 border border-gray-300/50 rounded-xl focus:ring-2 focus:ring-[#2C74B3] focus:border-transparent text-gray-800 bg-white/80"
                 >
                   <option value="English">English (Default)</option>
                   <option value="Spanish">Spanish</option>
@@ -320,7 +320,7 @@ export default function DashboardPage() {
               <button 
                 onClick={handleSavePreferences}
                 disabled={isSaving}
-                className="bg-[#2C74B3] text-white px-6 py-3 rounded-lg hover:bg-[#205295] transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-glass bg-[#2C74B3]/80 text-white px-6 py-3 rounded-xl hover:bg-[#205295]/80 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSaving ? 'Saving...' : 'Save Preferences'}
               </button>

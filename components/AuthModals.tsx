@@ -110,9 +110,9 @@ export default function AuthModals({
   return (
     <>
       <Dialog open={isSignInOpen} onClose={onCloseSignIn} className="relative z-50">
-        <div className="fixed inset-0 bg-black/70" aria-hidden="true" />
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-3 sm:p-4">
-          <Dialog.Panel className="bg-gray-900 rounded-lg p-6 sm:p-8 w-full max-w-sm mx-4 border border-gray-700 shadow-xl">
+          <Dialog.Panel className="popover-glass bg-gray-900/95 p-6 sm:p-8 w-full max-w-sm mx-4 text-white">
             <Dialog.Title className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-white">Sign In</Dialog.Title>
             <form onSubmit={handleSignIn} className="space-y-4 sm:space-y-5">
               <div>
@@ -121,7 +121,7 @@ export default function AuthModals({
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full rounded-md bg-gray-800 border-gray-600 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
+                  className="input-glass mt-1 block w-full bg-gray-800/50 border-gray-600/50 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
                   required
                 />
               </div>
@@ -131,14 +131,14 @@ export default function AuthModals({
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1 block w-full rounded-md bg-gray-800 border-gray-600 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
+                  className="input-glass mt-1 block w-full bg-gray-800/50 border-gray-600/50 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
                   required
                 />
               </div>
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2.5 sm:py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base"
+                className="btn-glass w-full bg-blue-600/80 text-white py-2.5 sm:py-3 px-4 rounded-xl hover:bg-blue-700/80 transition-colors font-medium text-sm sm:text-base"
               >
                 Sign In
               </button>
@@ -158,9 +158,9 @@ export default function AuthModals({
       </Dialog>
 
       <Dialog open={isSignUpOpen} onClose={onCloseSignUp} className="relative z-50">
-        <div className="fixed inset-0 bg-black/70" aria-hidden="true" />
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-3 sm:p-4">
-          <Dialog.Panel className="bg-gray-900 rounded-lg p-6 sm:p-8 w-full max-w-sm mx-4 border border-gray-700 shadow-xl max-h-[90vh] overflow-y-auto">
+          <Dialog.Panel className="popover-glass bg-gray-900/95 p-6 sm:p-8 w-full max-w-sm mx-4 text-white max-h-[90vh] overflow-y-auto">
             <Dialog.Title className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-white">Sign Up</Dialog.Title>
             <form onSubmit={handleSignUp} className="space-y-4 sm:space-y-5">
               <div>
@@ -169,7 +169,7 @@ export default function AuthModals({
                   type="text"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="mt-1 block w-full rounded-md bg-gray-800 border-gray-600 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
+                  className="input-glass mt-1 block w-full bg-gray-800/50 border-gray-600/50 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
                   required
                 />
               </div>
@@ -179,7 +179,7 @@ export default function AuthModals({
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="mt-1 block w-full rounded-md bg-gray-800 border-gray-600 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
+                  className="input-glass mt-1 block w-full bg-gray-800/50 border-gray-600/50 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
                   required
                 />
               </div>
@@ -204,7 +204,7 @@ export default function AuthModals({
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full rounded-md bg-gray-800 border-gray-600 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
+                  className="input-glass mt-1 block w-full bg-gray-800/50 border-gray-600/50 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
                   required
                 />
               </div>
@@ -214,14 +214,14 @@ export default function AuthModals({
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1 block w-full rounded-md bg-gray-800 border-gray-600 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
+                  className="input-glass mt-1 block w-full bg-gray-800/50 border-gray-600/50 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
                   required
                 />
               </div>
               {error && <p className="text-red-400 text-sm">{error}</p>}
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-2.5 sm:py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base"
+                className="btn-glass w-full bg-blue-600/80 text-white py-2.5 sm:py-3 px-4 rounded-xl hover:bg-blue-700/80 transition-colors font-medium text-sm sm:text-base"
               >
                 Sign Up
               </button>
