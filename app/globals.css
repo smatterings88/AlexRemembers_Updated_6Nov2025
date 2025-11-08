@@ -355,10 +355,13 @@ body {
   .btn-glass {
     @apply glass-lozenge btn-interactive;
     @apply hover:bg-white/15;
-    @apply active:bg-white/12;
     @apply hover:shadow-lg hover:shadow-blue-500/20;
     @apply hover:border-white/30;
     @apply relative overflow-hidden;
+  }
+  
+  .btn-glass:active {
+    background-color: rgba(255, 255, 255, 0.12);
   }
   
   .btn-glass::after {
