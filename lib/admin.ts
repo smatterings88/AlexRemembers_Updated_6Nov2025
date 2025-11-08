@@ -8,10 +8,10 @@ const ADMIN_EMAILS = [
 
 /**
  * Check if a user is a super admin
- * @param user - Firebase User object
+ * @param user - Firebase User object or decoded token with email property
  * @returns true if user is admin, false otherwise
  */
-export function isAdmin(user: User | null): boolean {
+export function isAdmin(user: User | null | { email?: string }): boolean {
   if (!user || !user.email) {
     return false;
   }

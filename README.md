@@ -12,7 +12,8 @@ AlexListens is an advanced AI voice assistant that provides natural, empathetic 
 - 💰 Wallet-based call time management
 - 🌍 Multi-language support (English, Spanish, Australian)
 - 👥 Admin panel for user management
- - 👤 Admin create-user (temp password) with forced first login password change
+- 👤 Admin create-user (temp password) with forced first login password change
+- 🗄️ Admin Pinecone usage management (view stats, delete memories)
 
 ## Tech Stack
 
@@ -102,6 +103,9 @@ This application uses a **client-first** architecture for Firebase with server-s
 - View all users and their statistics
 - Manage user wallets (add minutes)
 - Create users with temporary password (auto-initializes wallet with 10 minutes)
+- **Pinecone Usage Management**: View and manage user's vector memory usage
+  - View total memories, unique calls, oldest/newest memory dates
+  - Delete all memories for a user
 - System-wide statistics
 - Search and filter users
 - Access to all call data
@@ -111,6 +115,15 @@ Admin API routes:
   - Body: `{ email, firstName?, lastName?, username? }`
   - Returns: `{ uid, email, tempPassword }`
   - Auth: Requires Firebase ID token from an admin email (checked server-side)
+
+- `GET /api/admin/pinecone?userId={uid}&action=stats`
+  - Returns: `{ stats: { totalMemories, uniqueCallIds, oldestMemory?, newestMemory? } }`
+  - Auth: Requires Firebase ID token from an admin email
+
+- `DELETE /api/admin/pinecone?userId={uid}`
+  - Returns: `{ success: true, deletedCount, message }`
+  - Auth: Requires Firebase ID token from an admin email
+  - Deletes all Pinecone memories for the specified user
 
 ### Wallet System
 - New users receive 10 minutes (600 seconds) upon signup
@@ -173,6 +186,18 @@ The app uses Pinecone for vector storage and OpenAI for generating embeddings:
 
 **Note**: The Pinecone index will be created automatically on first use if it doesn't exist. Make sure your Pinecone account has sufficient credits.
 
+### Vector Memory Management Functions
+
+The `lib/vector-memory.ts` module provides the following functions for managing vector memories:
+
+- `storeMemory()` - Store individual memory with embedding
+- `searchMemories()` - Search for relevant memories using semantic similarity
+- `storeConversationMemory()` - Store full conversation transcripts
+- `getRelevantContext()` - Get formatted context for Ultravox
+- `getUserMemoryStats()` - Get user's Pinecone memory statistics (admin)
+- `deleteUserMemories()` - Delete all memories for a user (admin)
+- `listUsersWithMemories()` - List all users with memories (admin)
+
 ## Admin Configuration
 
 Super admin emails are configured in:
@@ -205,7 +230,8 @@ To add or modify admin emails, update both files.
 ├── app/
 │   └── api/
 │       └── admin/
-│           └── create-user/route.ts  # Admin user creation endpoint
+│           ├── create-user/route.ts  # Admin user creation endpoint
+│           └── pinecone/route.ts     # Admin Pinecone management endpoint
 └── firestore.rules     # Firestore security rules
 ```
 

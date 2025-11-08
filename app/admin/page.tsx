@@ -8,7 +8,7 @@ import { collection, getDocs, doc, getDoc, query, orderBy, limit } from 'firebas
 import { isAdmin } from '../../lib/admin';
 import { getWalletBalance, loadMinutes, formatSecondsToMinutes } from '../../lib/wallet';
 import UserDropdown from '../../components/UserDropdown';
-import { ArrowLeft, Users, Wallet, Phone, BarChart3, Search, Plus, RefreshCw, Shield, Eye, EyeOff, Copy } from 'lucide-react';
+import { ArrowLeft, Users, Wallet, Phone, BarChart3, Search, Plus, RefreshCw, Shield, Eye, EyeOff, Copy, Database, Trash2 } from 'lucide-react';
 
 interface UserData {
   uid: string;
@@ -23,6 +23,12 @@ interface UserWithStats extends UserData {
   walletBalance: number;
   totalCalls: number;
   lastCallAt?: Date;
+  pineconeStats?: {
+    totalMemories: number;
+    uniqueCallIds: number;
+    oldestMemory?: Date;
+    newestMemory?: Date;
+  };
 }
 
 interface SystemStats {
@@ -56,6 +62,16 @@ export default function AdminPage() {
   const [newUsername, setNewUsername] = useState('');
   const [createdTempPassword, setCreatedTempPassword] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [showPineconeModal, setShowPineconeModal] = useState(false);
+  const [selectedPineconeUser, setSelectedPineconeUser] = useState<UserWithStats | null>(null);
+  const [pineconeStats, setPineconeStats] = useState<{
+    totalMemories: number;
+    uniqueCallIds: number;
+    oldestMemory?: Date;
+    newestMemory?: Date;
+  } | null>(null);
+  const [loadingPineconeStats, setLoadingPineconeStats] = useState(false);
+  const [deletingMemories, setDeletingMemories] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -177,6 +193,72 @@ export default function AdminPage() {
 
   const handleRefresh = async () => {
     await loadAllData();
+  };
+
+  const handleViewPineconeUsage = async (user: UserWithStats) => {
+    setSelectedPineconeUser(user);
+    setShowPineconeModal(true);
+    setLoadingPineconeStats(true);
+    setPineconeStats(null);
+
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const res = await fetch(`/api/admin/pinecone?userId=${user.uid}&action=stats`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setPineconeStats(data.stats);
+      } else {
+        const error = await res.json();
+        alert(error.error || 'Failed to load Pinecone stats');
+      }
+    } catch (err) {
+      console.error('Error loading Pinecone stats:', err);
+      alert('Failed to load Pinecone stats');
+    } finally {
+      setLoadingPineconeStats(false);
+    }
+  };
+
+  const handleDeletePineconeMemories = async () => {
+    if (!selectedPineconeUser) return;
+    
+    if (!confirm(`Are you sure you want to delete ALL Pinecone memories for ${selectedPineconeUser.email}? This action cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingMemories(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const res = await fetch(`/api/admin/pinecone?userId=${selectedPineconeUser.uid}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        alert(`Successfully deleted ${data.deletedCount} memories for ${selectedPineconeUser.email}`);
+        // Refresh stats
+        await handleViewPineconeUsage(selectedPineconeUser);
+        // Refresh user list
+        await loadAllData();
+      } else {
+        const error = await res.json();
+        alert(error.error || 'Failed to delete memories');
+      }
+    } catch (err) {
+      console.error('Error deleting memories:', err);
+      alert('Failed to delete memories');
+    } finally {
+      setDeletingMemories(false);
+    }
   };
 
   const handleCreateUser = async () => {
@@ -358,6 +440,9 @@ export default function AdminPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Vector Memory
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -389,11 +474,22 @@ export default function AdminPage() {
                       <div className="text-sm text-gray-900">{user.totalCalls}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div className="flex gap-3">
+                        <button
+                          onClick={() => setSelectedUser(user)}
+                          className="text-[#2C74B3] hover:text-[#205295] font-medium"
+                        >
+                          Manage Wallet
+                        </button>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button
-                        onClick={() => setSelectedUser(user)}
-                        className="text-[#2C74B3] hover:text-[#205295] font-medium"
+                        onClick={() => handleViewPineconeUsage(user)}
+                        className="text-purple-600 hover:text-purple-800 font-medium flex items-center gap-1"
                       >
-                        Manage Wallet
+                        <Database className="w-4 h-4" />
+                        View Usage
                       </button>
                     </td>
                   </tr>
@@ -555,6 +651,120 @@ export default function AdminPage() {
                 className="btn-glass flex-1 px-4 py-2 bg-green-600/80 text-white rounded-xl hover:bg-green-700/80 transition-colors disabled:opacity-50"
               >
                 {creating ? 'Creating...' : 'Create User'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pinecone Usage Modal */}
+      {showPineconeModal && selectedPineconeUser && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="popover-glass bg-white/95 text-gray-900 rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-lg">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-[#0A2647] flex items-center gap-2">
+                <Database className="w-6 h-6 text-purple-600" />
+                Pinecone Usage
+              </h2>
+              <button
+                onClick={() => {
+                  setShowPineconeModal(false);
+                  setSelectedPineconeUser(null);
+                  setPineconeStats(null);
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-sm text-gray-600 mb-2">
+                <span className="font-semibold">User:</span> {selectedPineconeUser.email}
+              </p>
+              {selectedPineconeUser.firstName && selectedPineconeUser.lastName && (
+                <p className="text-sm text-gray-600 mb-4">
+                  <span className="font-semibold">Name:</span> {selectedPineconeUser.firstName} {selectedPineconeUser.lastName}
+                </p>
+              )}
+            </div>
+
+            {loadingPineconeStats ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+                <p className="text-gray-600 mt-2">Loading Pinecone statistics...</p>
+              </div>
+            ) : pineconeStats ? (
+              <div className="space-y-4">
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600">Total Memories</p>
+                      <p className="text-2xl font-bold text-purple-600">{pineconeStats.totalMemories}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600">Unique Calls</p>
+                      <p className="text-2xl font-bold text-purple-600">{pineconeStats.uniqueCallIds}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {pineconeStats.oldestMemory && (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-gray-600 mb-1">Oldest Memory</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {new Date(pineconeStats.oldestMemory).toLocaleString()}
+                    </p>
+                  </div>
+                )}
+
+                {pineconeStats.newestMemory && (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <p className="text-sm text-gray-600 mb-1">Newest Memory</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {new Date(pineconeStats.newestMemory).toLocaleString()}
+                    </p>
+                  </div>
+                )}
+
+                {pineconeStats.totalMemories === 0 && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p className="text-sm text-yellow-800">No memories found for this user.</p>
+                  </div>
+                )}
+
+                {pineconeStats.totalMemories > 0 && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <button
+                      onClick={handleDeletePineconeMemories}
+                      disabled={deletingMemories}
+                      className="btn-glass w-full bg-red-600/80 text-white py-3 px-4 rounded-xl hover:bg-red-700/80 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      {deletingMemories ? 'Deleting...' : 'Delete All Memories'}
+                    </button>
+                    <p className="text-xs text-gray-500 mt-2 text-center">
+                      This will permanently delete all {pineconeStats.totalMemories} memories for this user.
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-600">Failed to load statistics</p>
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => {
+                  setShowPineconeModal(false);
+                  setSelectedPineconeUser(null);
+                  setPineconeStats(null);
+                }}
+                className="btn-glass px-4 py-2 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors text-gray-700"
+              >
+                Close
               </button>
             </div>
           </div>
