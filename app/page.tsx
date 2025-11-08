@@ -416,6 +416,8 @@ export default function HomePage() {
         
         if (lastActiveStatusRef.current && newStatus === 'disconnected') {
           logCallToWallet('CALL_ENDED_NATURALLY');
+          // Reset call state when Alex hangs up
+          setIsStarted(false);
         }
         
         setStatus(newStatus);
@@ -714,7 +716,8 @@ export default function HomePage() {
   };
 
   const renderCallButtons = () => {
-    if (!isStarted) {
+    // Show "Start Call" button if call hasn't started or if call has ended (disconnected)
+    if (!isStarted || status === 'disconnected') {
       return (
         <button
           key={`start-${callButtonKey}`}
