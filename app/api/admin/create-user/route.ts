@@ -26,6 +26,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'email is required' }, { status: 400 });
     }
 
+    // Check if username is already taken (if provided)
+    if (username) {
+      const usernameDoc = await adminDb.collection('usernames').doc(username).get();
+      if (usernameDoc.exists()) {
+        return NextResponse.json({ error: 'Username already taken' }, { status: 409 });
+      }
+    }
+
     // Generate a temporary password
     const tempPassword = Math.random().toString(36).slice(-10) + 'A1!';
 
@@ -34,7 +42,7 @@ export async function POST(request: NextRequest) {
       email,
       password: tempPassword,
       emailVerified: false,
-      displayName: [firstName, lastName].filter(Boolean).join(' ') || undefined,
+      displayName: username || [firstName, lastName].filter(Boolean).join(' ') || undefined,
       disabled: false,
     });
 
@@ -58,7 +66,7 @@ export async function POST(request: NextRequest) {
     const walletRef = adminDb.collection('wallets').doc(uid);
     batch.set(walletRef, {
       // store seconds; 10 minutes = 600 seconds
-      balanceSeconds: 600,
+      balance: 600,
       lastLoaded: new Date(),
       updatedAt: new Date(),
     }, { merge: true });
@@ -70,6 +78,15 @@ export async function POST(request: NextRequest) {
       createdAt: new Date(),
       updatedAt: new Date(),
     }, { merge: true });
+
+    // Reserve username if provided
+    if (username) {
+      const usernameRef = adminDb.collection('usernames').doc(username);
+      batch.set(usernameRef, {
+        uid: uid,
+        createdAt: new Date(),
+      }, { merge: true });
+    }
 
     await batch.commit();
 
