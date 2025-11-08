@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { auth, db } from '../lib/firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { initWalletForUser } from '../lib/wallet';
 
@@ -27,6 +27,10 @@ export default function AuthModals({
   const [username, setUsername] = useState('');
   const [usernameAvailable, setUsernameAvailable] = useState(true);
   const [error, setError] = useState('');
+  const [resetPasswordEmail, setResetPasswordEmail] = useState('');
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetPasswordSent, setResetPasswordSent] = useState(false);
+  const [resetPasswordError, setResetPasswordError] = useState('');
 
   useEffect(() => {
     const checkUsername = async () => {
@@ -107,6 +111,31 @@ export default function AuthModals({
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetPasswordError('');
+    setResetPasswordSent(false);
+
+    if (!resetPasswordEmail) {
+      setResetPasswordError('Please enter your email address');
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, resetPasswordEmail);
+      setResetPasswordSent(true);
+    } catch (err: any) {
+      console.error('Password reset error:', err);
+      if (err.code === 'auth/user-not-found') {
+        setResetPasswordError('No account found with this email address');
+      } else if (err.code === 'auth/invalid-email') {
+        setResetPasswordError('Invalid email address');
+      } else {
+        setResetPasswordError('Failed to send reset email. Please try again.');
+      }
+    }
+  };
+
   return (
     <>
       <Dialog open={isSignInOpen} onClose={onCloseSignIn} className="relative z-50">
@@ -126,7 +155,21 @@ export default function AuthModals({
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-200 mb-1">Password</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-gray-200">Password</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowResetPassword(true);
+                      setResetPasswordEmail(email);
+                      setResetPasswordSent(false);
+                      setResetPasswordError('');
+                    }}
+                    className="text-xs text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
                 <input
                   type="password"
                   value={password}
@@ -153,6 +196,79 @@ export default function AuthModals({
                 </button>
               </p>
             </form>
+          </Dialog.Panel>
+        </div>
+      </Dialog>
+
+      {/* Reset Password Modal */}
+      <Dialog open={showResetPassword} onClose={() => {
+        setShowResetPassword(false);
+        setResetPasswordEmail('');
+        setResetPasswordSent(false);
+        setResetPasswordError('');
+      }} className="relative z-50">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-3 sm:p-4">
+          <Dialog.Panel className="popover-glass bg-gray-900/95 p-6 sm:p-8 w-full max-w-sm mx-4 text-white">
+            <Dialog.Title className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-white">Reset Password</Dialog.Title>
+            {resetPasswordSent ? (
+              <div className="space-y-4">
+                <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4">
+                  <p className="text-green-300 text-sm sm:text-base">
+                    Password reset email sent! Check your inbox at <span className="font-semibold">{resetPasswordEmail}</span>
+                  </p>
+                </div>
+                <p className="text-gray-300 text-xs sm:text-sm">
+                  Click the link in the email to reset your password. The link will expire in 1 hour.
+                </p>
+                <button
+                  onClick={() => {
+                    setShowResetPassword(false);
+                    setResetPasswordEmail('');
+                    setResetPasswordSent(false);
+                    setResetPasswordError('');
+                  }}
+                  className="btn-glass w-full bg-blue-600/80 text-white py-2.5 sm:py-3 px-4 rounded-xl hover:bg-blue-700/80 transition-colors font-medium text-sm sm:text-base"
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleResetPassword} className="space-y-4 sm:space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-200 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={resetPasswordEmail}
+                    onChange={(e) => setResetPasswordEmail(e.target.value)}
+                    className="input-glass mt-1 block w-full bg-gray-800/50 border-gray-600/50 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2 text-sm sm:text-base"
+                    placeholder="Enter your email address"
+                    required
+                  />
+                </div>
+                {resetPasswordError && <p className="text-red-400 text-sm">{resetPasswordError}</p>}
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowResetPassword(false);
+                      setResetPasswordEmail('');
+                      setResetPasswordSent(false);
+                      setResetPasswordError('');
+                    }}
+                    className="btn-glass flex-1 px-4 py-2 border border-gray-600 rounded-xl hover:bg-gray-800/50 transition-colors text-gray-200 text-sm sm:text-base"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn-glass flex-1 bg-blue-600/80 text-white py-2.5 sm:py-3 px-4 rounded-xl hover:bg-blue-700/80 transition-colors font-medium text-sm sm:text-base"
+                  >
+                    Send Reset Link
+                  </button>
+                </div>
+              </form>
+            )}
           </Dialog.Panel>
         </div>
       </Dialog>
