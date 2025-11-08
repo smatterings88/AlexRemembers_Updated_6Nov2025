@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     // Check if username is already taken (if provided)
     if (username) {
       const usernameDoc = await adminDb.collection('usernames').doc(username).get();
-      if (usernameDoc.exists()) {
+      if (usernameDoc.exists) {
         return NextResponse.json({ error: 'Username already taken' }, { status: 409 });
       }
     }
